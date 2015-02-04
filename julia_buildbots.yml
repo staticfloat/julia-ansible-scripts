@@ -1,0 +1,51 @@
+- hosts: julia_buildslave_ubuntu
+  tasks:
+    - name: Install buildtools
+      sudo: true
+      apt: name={{ item }} state=latest
+      with_items:
+        # Basic stuff we need for every ubuntu machine
+        - curl
+        - git
+        - build-essential
+        - g++
+        - gcc
+        - python-pip
+        - python-dev
+        - python
+        - bzr
+        - devscripts
+        - ccache
+        # More Julia-specific stuff
+        - patchelf
+        - gfortran 
+        - m4
+        - zlib1g-dev
+        - cmake
+
+- hosts: julia_buildslave_osx
+  tasks:
+    - name: Install buildtools
+      homebrew: name={{ item }} state=latest
+      with_items:
+        - gcc
+        - git
+        - python
+        - tmux
+        - ccache
+
+- hosts: julia_buildslave_centos
+  tasks:
+    - name: Install buildtools
+      sudo: true
+      yum: name={{ item }} state=latest
+      with_items:
+        - net-tools
+        - nano
+        - kernel-devel
+        - htop
+        - tmux
+        - python
+        - python-devel
+        - cmake
+        - ccache
