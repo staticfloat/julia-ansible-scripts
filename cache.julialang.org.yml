@@ -1,0 +1,76 @@
+---
+- hosts: cache_staging.julialang.org
+  vars_files:
+    - secret/vars.yml
+  pre_tasks:
+    # Save out our home directory
+    - shell: echo ~
+      register: home
+      sudo: no
+
+    - name: Make sure packages are installed
+      apt: name={{ item }} state=latest
+      with_items:
+        - git
+        - python-flask
+        - python-boto
+      sudo: yes
+
+    # Also clone git repository to get cache server code, and setup tornado to serve at startup
+    - name: Checkout cache.julialang.org source to ~/cache.julialang.org
+      git: repo=https://github.com/staticfloat/cache.julialang.org.git
+           dest=~/cache.julialang.org
+
+    # Copy in aws credentials
+    - copy: src=~/.boto dest={{home.stdout}}/.boto owner=ubuntu mode=0600
+
+  roles:
+    - role: server
+      server_hostname: cache
+
+    - role: nginx
+      sudo: yes
+      # Install SSL certificates
+      nginx_ssl_files:
+        cache.julialang.org:
+          key: "~/etc/secure/ssl/cache.julialang.org.key"
+          certs:
+            - "~/etc/secure/ssl/cache.julialang.org.crt"
+            - "~/etc/secure/ssl/startssl.chain.crt"
+        cache.e.ip.saba.us:
+          key: "~/etc/secure/ssl/cache.e.ip.saba.us.key"
+          certs:
+            - "~/etc/secure/ssl/cache.e.ip.saba.us.crt"
+            - "~/etc/secure/ssl/startssl.chain.crt"
+      nginx_sites:
+        # Create HTTP -> HTTPS redirection metaserver
+        ssl_redirect:
+          - listen 80
+          - server_name cache.julialang.org *.cache.julialang.org cache.e.ip.saba.us *.cache.e.ip.saba.us
+          - return 301 https://$http_host$request_uri
+
+        # Actual cache.julialang.org website configuration
+        cache.julialang.org:
+          - listen 443 ssl
+          #- listen 80
+          - server_name         cache.julialang.org *.cache.julialang.org cache.e.ip.saba.us *.cache.e.ip.saba.us
+          - ssl_certificate     ssl/cache.e.ip.saba.us.crt
+          - ssl_certificate_key ssl/cache.e.ip.saba.us.key
+          - ssl_protocols       TLSv1 TLSv1.1 TLSv1.2
+
+          # Send everything off to :5000, which is our python server
+          - location / {
+              proxy_pass http://127.0.0.1:5000;
+            }
+
+      nginx_configs:
+        general:
+          - server_names_hash_bucket_size 64
+          - gzip on
+
+    # Also add tornado role to run cache.julialang.org/server.py
+    - role: startup_script
+      service_name: cache
+      daemon: /usr/bin/python
+      daemon_opts: "{{home.stdout}}/cache.julialang.org/cache.py"
+
