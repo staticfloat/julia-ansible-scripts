@@ -1,5 +1,5 @@
 ---
-- hosts: cache_staging.julialang.org
+- hosts: cache.julialang.org
   vars_files:
     - secret/vars.yml
   pre_tasks:
