@@ -1,0 +1,9 @@
+---
+# Change this to whatever you want to run the provisioning process on
+- hosts: julia_buildslave_ubuntu
+  vars_files:
+    - secret/vars.yml
+  sudo: yes
+  roles:
+    - role: julia_buildslave
+    - role: server
