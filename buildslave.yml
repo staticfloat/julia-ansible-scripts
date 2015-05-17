@@ -4,6 +4,19 @@
   vars_files:
     - secret/vars.yml
   sudo: yes
+  pre_tasks:
+    # Save home directory to "home" envvar
+    - shell: echo ~
+      sudo: no
+      register: home
+
   roles:
     - role: julia_buildslave
+
     - role: server
+
+    # Also add startup role to run biliserver/server.py
+    - role: startup_script
+      service_name: buildslave
+      daemon: /usr/bin/python
+      daemon_opts: "{{home.stdout}}/buildbot/sandbox/bin/buildslave start --nodaemon"
