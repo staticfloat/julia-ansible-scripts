@@ -11,9 +11,10 @@
       register: home
 
   roles:
-    - role: julia_buildslave
-
+    # You've gotta be first, la!
     - role: server
+
+    - role: julia_buildslave
 
     # Also add startup role to run biliserver/server.py
     - role: startup_script
