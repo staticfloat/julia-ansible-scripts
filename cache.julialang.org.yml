@@ -63,11 +63,6 @@
               proxy_pass http://127.0.0.1:5000;
             }
 
-      nginx_configs:
-        general:
-          - server_names_hash_bucket_size 64
-          - gzip on
-
     # Also add startup role to run cache.julialang.org/server.py
     - role: startup_script
       service_name: cache
