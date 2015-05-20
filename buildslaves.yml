@@ -7,6 +7,12 @@
     - raw: yum -y install python-simplejson
 
 
+- hosts: julia_buildslaves_ancient
+  sudo: yes
+  roles:
+    - repo-epel
+
+
 
 - hosts: julia_buildslaves
   vars_files:
