@@ -1,0 +1,37 @@
+---
+# Download/install GCC on ancient buildslaves
+- hosts: julia_buildslaves_ancient
+  sudo: no
+  tasks:
+    # Download GCC, get source all setup and ready to build
+    - file: path=~/src state=directory
+    - file: path=~/src/gcc_source state=directory
+    - stat: path=~/src/gcc_source/gcc-5.1.0.tar.gz
+      register: p
+    - get_url:
+        dest: ~/src/gcc_source
+        url: http://mirrors.concertpass.com/gcc/releases/gcc-5.1.0/gcc-5.1.0.tar.gz
+      when: not p.stat.exists
+
+    - stat: path=~/src/gcc_source/gcc-5.1.0
+      register: p
+    - unarchive: copy=no src=~/src/gcc_source/gcc-5.1.0.tar.gz dest=~/src/gcc_source/
+      when: not p.stat.exists
+    - command: contrib/download_prerequisites
+      args:
+        chdir: ~/src/gcc_source/gcc-5.1.0
+        creates: ~/src/gcc_source/gcc-5.1.0/isl-0.14
+
+
+    - file: path=~/src/gcc_build state=directory
+    - command: ~/src/gcc_source/gcc-5.1.0/configure --prefix=$HOME/local --enable-host-shared --enable-languages=c,c++,fortran --disable-multilib
+      args:
+        chdir: ~/src/gcc_build
+        creates: ~/src/gcc_build/Makefile
+    - command: make -j2
+      args:
+        chdir: ~/src/gcc_build
+        creates: ~/src/gcc_build/gcc/xgcc
+    - command: make install
+      args:
+        chdir: ~/src/gcc_build
