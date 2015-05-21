@@ -43,4 +43,4 @@
     - role: startup_script
       service_name: buildslave
       daemon: /bin/bash 
-      daemon_opts: "source {{home.stdout}}/.bash_profile; {{home.stdout}}/buildbot/sandbox/bin/buildslave start --nodaemon"
+      daemon_opts: "-c 'source {{home.stdout}}/.bash_profile; {{home.stdout}}/buildbot/sandbox/bin/buildslave start --nodaemon'"
