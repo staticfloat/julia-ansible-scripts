@@ -7,51 +7,10 @@
     - raw: yum -y install python-simplejson
 
 
-- hosts: julia_buildslaves_ancient
+- hosts: julia_buildslaves_centos
   sudo: yes
   roles:
     - repo-epel
-
-
-# Download/install GCC on ancient buildslaves
-- hosts: julia_buildslaves_ancient
-  sudo: no
-  tasks:
-    # Download GCC, get source all setup and ready to build
-    - file: path=~/src state=directory
-    - file: path=~/src/gcc_source state=directory
-    - stat: path=~/src/gcc_source/gcc-5.1.0.tar.gz
-      register: p
-    - get_url:
-        dest: ~/src/gcc_source
-        url: http://mirrors.concertpass.com/gcc/releases/gcc-5.1.0/gcc-5.1.0.tar.gz
-      when: not p.stat.exists
-
-    - stat: path=~/src/gcc_source/gcc-5.1.0
-      register: p
-    - unarchive: copy=no src=~/src/gcc_source/gcc-5.1.0.tar.gz dest=~/src/gcc_source/
-      when: not p.stat.exists
-    - command: contrib/download_prerequisites
-      args:
-        chdir: ~/src/gcc_source/gcc-5.1.0
-        creates: ~/src/gcc_source/gcc-5.1.0/isl-0.14
-
-
-    - file: path=~/src/gcc_build state=directory
-    - command: ~/src/gcc_source/gcc-5.1.0/configure --prefix=$HOME/local --enable-host-shared --enable-languages=c,c++,fortran
-      args:
-        chdir: ~/src/gcc_build
-        creates: ~/src/gcc_build/Makefile
-    - command: make -j
-      args:
-        chdir: ~/src/gcc_build
-        #############################################
-        #creates: ~/src/gcc_build/gcc
-        #############################################
-    - command: make install
-      args:
-        chdir: ~/src/gcc_build
-
 
 
 - hosts: julia_buildslaves
@@ -70,8 +29,18 @@
 
     - role: julia_buildslave
 
-    # Also add startup role to run biliserver/server.py
+    - role: diamond
+      build_from_source: yes
+      influxdbhandler:
+        enable: True
+        host: graph.e.ip.saba.us
+        port: 8443
+        username: root
+        password: "{{ influxdb_root_password }}"
+        database: carbon
+
+    # Also add startup role to run buildslave
     - role: startup_script
       service_name: buildslave
-      daemon: /usr/bin/python
-      daemon_opts: "{{home.stdout}}/buildbot/sandbox/bin/buildslave start --nodaemon"
+      daemon: /bin/bash 
+      daemon_opts: "source {{home.stdout}}/.bash_profile; {{home.stdout}}/buildbot/sandbox/bin/buildslave start --nodaemon"
