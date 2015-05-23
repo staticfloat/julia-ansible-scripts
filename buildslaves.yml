@@ -42,5 +42,7 @@
     # Also add startup role to run buildslave
     - role: startup_script
       service_name: buildslave
-      daemon: /bin/bash 
-      daemon_opts: "-c 'source {{home.stdout}}/.bash_profile; {{home.stdout}}/buildbot/sandbox/bin/buildslave start --nodaemon'"
+      chdir: "{{home.stdout}}/buildbot/slave"
+      daemon: "{{home.stdout}}/buildbot/sandbox/bin/buildslave"
+      daemon_opts: "start --nodaemon"
+      script_setup: "source {{home.stdout}}/.bash_profile; echo JUST SOURCED IT, BIZNITCH!"
