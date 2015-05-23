@@ -3,8 +3,29 @@
 - hosts: julia_buildslaves_ancient
   sudo: no
   tasks:
-    # Download GCC, get source all setup and ready to build
     - file: path=~/src state=directory
+
+    # Download binutils, get source all setup and ready to build
+    - stat: path=~/src/binutils-2.25.tar.gz
+      register: p
+    - get_url:
+        dest: ~/src
+        url: http://ftp.gnu.org/gnu/binutils/binutils-2.25.tar.gz
+      when: not p.stat.exists
+    - unarchive: copy=no src=~/src/binutils-2.25.tar.gz dest=~/src creates=~/src/binutils-2.25
+      when: not p.stat.exists
+
+    # Build binutils
+    - command: ./configure --prefix=$HOME/local
+      args:
+        chdir: ~/src/binutils-2.25
+        creates: ~/src/binutils-2.25/Makefile
+    - shell: make && make install
+      args:
+        chdir: ~/src/binutils-2.25
+        creates: ~/local/bin/gas
+
+    # Download GCC, get source all setup and ready to build
     - file: path=~/src/gcc_source state=directory
     - stat: path=~/src/gcc_source/gcc-5.1.0.tar.gz
       register: p
@@ -12,10 +33,7 @@
         dest: ~/src/gcc_source
         url: http://mirrors.concertpass.com/gcc/releases/gcc-5.1.0/gcc-5.1.0.tar.gz
       when: not p.stat.exists
-
-    - stat: path=~/src/gcc_source/gcc-5.1.0
-      register: p
-    - unarchive: copy=no src=~/src/gcc_source/gcc-5.1.0.tar.gz dest=~/src/gcc_source/
+    - unarchive: copy=no src=~/src/gcc_source/gcc-5.1.0.tar.gz dest=~/src/gcc_source/ creates=~/src/gcc_source/gcc-5.1.0
       when: not p.stat.exists
     - command: contrib/download_prerequisites
       args:
@@ -24,7 +42,7 @@
 
 
     - file: path=~/src/gcc_build state=directory
-    - command: ~/src/gcc_source/gcc-5.1.0/configure --prefix=$HOME/local --enable-host-shared --enable-languages=c,c++,fortran --disable-multilib
+    - command: gcc-5.1.0/configure --prefix=$HOME/local --with-gas=$HOME/local/bin/gas --enable-host-shared --enable-languages=c,c++,fortran --disable-multilib
       args:
         chdir: ~/src/gcc_build
         creates: ~/src/gcc_build/Makefile
