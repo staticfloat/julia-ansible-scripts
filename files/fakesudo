@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Get rid of any parameters passed to 'sudo'
+while [[ $1 == -* ]]; do
+	if [[ "-a -g -h -p -u -U -r -t" == *$1* ]]; then
+		shift 2
+	else
+		shift 1
+	fi
+done
+
+"$@"
