@@ -1,5 +1,10 @@
 function Install-Cygwin {
-    param ( $CygDir="c:\cygwin", $arch="x86", $password )
+    param ( $CygDir="c:\cygwin", $arch="x86")
+
+    # Generate random password
+    $Assembly = Add-Type -AssemblyName System.Web
+    $password = [System.Web.Security.Membership]::GeneratePassword(14,2)
+
     if(!(Test-Path -Path $CygDir -PathType Container)) {
         Write-Verbose "Creating directory $CygDir"
         New-Item -Type Directory -Path $CygDir -Force
@@ -8,7 +13,7 @@ function Install-Cygwin {
     $client = new-object System.Net.WebClient
     $client.DownloadFile("http://cygwin.com/setup-$arch.exe", "$CygDir\setup-$arch.exe" )
 
-    $pkg_list = "git,make,curl,patch,python,gcc-g++,m4,cmake,p7zip,ssh"
+    $pkg_list = "git,make,curl,patch,python,gcc-g++,m4,cmake,p7zip,openssh,nano,tmux"
     if( $arch -eq "x86" ) {
         $pkg_list += ",mingw64-i686-gcc-g++,mingw64-i686-gcc-fortran"
     } else {
@@ -45,4 +50,4 @@ function Install-Cygwin {
     chmod 0600 ~/.ssh
 }
 
-Install-Cygwin -arch "x86" -password "julialang.sshpassword123"
+Install-Cygwin -arch "x86"
