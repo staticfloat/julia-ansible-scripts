@@ -1,7 +1,5 @@
 ---
 - hosts: julia_buildslaves
-  vars_files:
-    - secret/vars.yml
   sudo: no
   tasks:
     - shell: echo "yes"
