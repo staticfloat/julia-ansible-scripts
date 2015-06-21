@@ -40,7 +40,7 @@
         chdir: ~/src/gcc_source/gcc-5.1.0
         creates: ~/src/gcc_source/gcc-5.1.0/isl-0.14
 
-
+    # Actually build the big guy
     - file: path=~/src/gcc_build state=directory
     - command: gcc-5.1.0/configure --prefix=$HOME/local --with-gas=$HOME/local/bin/gas --enable-host-shared --enable-languages=c,c++,fortran --disable-multilib
       args:
