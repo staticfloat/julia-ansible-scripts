@@ -1,0 +1,10 @@
+---
+- hosts: julia_buildslaves
+  vars_files:
+    - secret/vars.yml
+  environment:
+    PATH: "{{ansible_env.PATH}}:/usr/local/bin"
+  sudo: no
+  tasks:
+    - shell: echo "yes"
+
