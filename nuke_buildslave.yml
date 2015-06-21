@@ -2,5 +2,5 @@
 - hosts: julia_buildslaves
   sudo: no
   tasks:
-    - shell: rm -rf ~/buildbot/slave/{package_,build_}*
+    - shell: /bin/bash -c 'rm -rf ~/buildbot/slave/{package_,build_}*'
       sudo: yes
