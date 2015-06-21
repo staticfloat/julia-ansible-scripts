@@ -14,6 +14,7 @@ function Install-Msys2 {
     $msys2tarball = "msys2-base-$arch-20150512.tar"
     $msyspath = "C:\msys$bits"
 
+    # This takes a long time, let's only do it if we need to.
     if(!(Test-Path -Path "$msyspath/usr/bin/git.exe")) {
         # install chocolatey and cmake
         Write-Verbose "Installing Chocolatey from https://chocolatey.org/install.ps1"
@@ -105,7 +106,6 @@ net start sshd
     (new-object net.webclient).DownloadFile("http://sophia.e.ip.saba.us/julia_rsa.pub", "$msyspath\home\Administrator\.ssh\authorized_keys" )
 
     Write-Verbose "chown'ing authorized_keys"
-
     &$msyspath\usr\bin\bash -lc @'
 chown Administrator ~/.ssh/authorized_keys
 chmod 0600 ~/.ssh/authorized_keys
@@ -114,6 +114,7 @@ chmod 0600 ~/.ssh
 '@
 }
 
-# Then, install Msys2
+# Then, install Msys2 as either 64-bit or 32-bit
 Install-Msys2 -arch "i686"
+#Install-Msys2 -arch "x86_64"
 
