@@ -1,0 +1,36 @@
+---
+# Download/install Python 2.7 on ancient buildslaves
+- hosts: julia_buildslaves_ancient
+  sudo: no
+  tasks:
+    - file: path=~/src state=directory
+    - yum: name={{item}} state=latest
+      with_items:
+        - zlib-devel
+        - openssl-devel
+        - libedit-devel
+      sudo: yes
+
+    # Download python, get source all setup and ready to build
+    - stat: path=~/src/Python-2.7.10.tgz
+      register: p
+    - get_url:
+        dest: ~/src
+        url: https://www.python.org/ftp/python/2.7.10/Python-2.7.10.tgz
+      when: not p.stat.exists
+    - unarchive: copy=no src=~/src/Python-2.7.10.tgz dest=~/src creates=~/src/Python-2.7.10
+      when: not p.stat.exists
+
+    # Build and install python
+    - command: ./configure --prefix=$HOME/local
+      args:
+        chdir: ~/src/Python-2.7.10
+        creates: ~/src/Python-2.7.10/Makefile
+    - shell: make && make install
+      args:
+        chdir: ~/src/Python-2.7.10
+        creates: ~/local/bin/python
+
+    # Install pip and virtualenv
+    - shell: curl -L https://bootstrap.pypa.io/get-pip.py | ~/local/bin/python
+    - command: ~/local/bin/pip install virtualenv
