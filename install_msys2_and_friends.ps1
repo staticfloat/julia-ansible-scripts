@@ -46,9 +46,17 @@ function Install-Msys2 {
         Write-Verbose "Installing bash, pacman, pacman-mirrors and msys2-runtime"
         &$msyspath\usr\bin\sh -lc "pacman --noconfirm --force --needed -Sy bash pacman pacman-mirrors msys2-runtime"
 
-        $pkg_list = "diffutils git curl python nano tmux m4 make patch tar p7zip msys/python2 openssh cygrunsrv mingw-w64-$arch-editrights"
+        $pkg_list = "diffutils git curl nano tmux m4 make patch tar p7zip openssh cygrunsrv mingw-w64-$arch-editrights"
         Write-Verbose "Installing $pkg_list"
         &$msyspath\usr\bin\sh -lc "pacman --noconfirm -Syu && pacman --noconfirm -S $pkg_list"
+
+        Write-Verbose "Rebasing MSYS2"
+        &$msyspath\autorebase.bat
+
+        # Let's install python
+        Write-Verbose "Installing python from chocolatey"
+        choco install -y python2
+        &$msyspath\usr\bin\sh -lc 'ln -s $(which python) /usr/bin/python'
     }
 
     # Start doing the ssh-configuration dance
