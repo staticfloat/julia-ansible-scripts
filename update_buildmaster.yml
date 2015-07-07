@@ -1,0 +1,6 @@
+---
+# Update buildmaster
+- hosts: julia_buildmaster
+  sudo: no
+  tasks:
+    - raw: cd buildbot; git pull; sandbox/bin/buildbot reconfig master
