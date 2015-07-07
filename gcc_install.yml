@@ -1,6 +1,6 @@
 ---
 # Download/install GCC on ancient buildslaves
-- hosts: julia_buildslaves_ancient
+- hosts: julia_buildslaves_linux
   sudo: no
   tasks:
     - file: path=~/src state=directory
