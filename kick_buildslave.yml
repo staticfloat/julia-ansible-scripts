@@ -2,4 +2,4 @@
 - hosts: julia_buildslaves
   sudo: no
   tasks:
-    - raw: ~/buildbot/sandbox/bin/buildslave stop; ~/buildbot/sandbox/bin/buildslave start slave
+    - raw: cd ~/buildbot; sandbox/bin/buildslave stop; sandbox/bin/buildslave start slave
