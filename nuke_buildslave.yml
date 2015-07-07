@@ -4,3 +4,5 @@
   tasks:
     - raw: sudo rm -rf ~/buildbot/slave/package_*
     - raw: sudo rm -rf ~/buildbot/slave/build_*
+    - raw: ccache -C
+      ignore_errors: true
