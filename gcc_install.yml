@@ -1,6 +1,6 @@
 ---
-# Download/install GCC on ancient buildslaves
-- hosts: julia_buildslaves_linux
+# Download/install binutils on ancient buildslaves first
+- hosts: julia_buildslaves_ancient
   sudo: no
   tasks:
     - file: path=~/src state=directory
@@ -16,7 +16,7 @@
       when: not p.stat.exists
 
     # Build binutils
-    - command: ./configure --prefix=$HOME/local --with-sysroot=$HOME/local
+    - command: ./configure --prefix=$HOME/local
       args:
         chdir: ~/src/binutils-2.25
         creates: ~/src/binutils-2.25/Makefile
@@ -24,6 +24,11 @@
       args:
         chdir: ~/src/binutils-2.25
         creates: ~/local/bin/gas
+
+- hosts: julia_buildslaves_linux
+  sudo: no
+  tasks:
+    - file: path=~/src state=directory
 
     # Download GCC, get source all setup and ready to build
     - file: path=~/src/gcc_source state=directory
@@ -42,7 +47,7 @@
 
     # Actually build the big guy
     - file: path=~/src/gcc_build state=directory
-    - command: ~/src/gcc_source/gcc-5.1.0/configure --prefix=$HOME/local --with-gas=$HOME/local/bin/gas --with-sysroot=$HOME/local --enable-host-shared --enable-languages=c,c++,fortran --disable-multilib
+    - command: ~/src/gcc_source/gcc-5.1.0/configure --prefix=$HOME/local --with-gas=$HOME/local/bin/gas --enable-host-shared --enable-languages=c,c++,fortran --disable-multilib
       args:
         chdir: ~/src/gcc_build
         creates: ~/src/gcc_build/Makefile
