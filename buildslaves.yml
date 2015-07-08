@@ -59,4 +59,4 @@
       chdir: "{{home.stdout}}/buildbot/slave"
       daemon: "{{home.stdout}}/buildbot/sandbox/bin/buildslave"
       daemon_opts: "start --nodaemon"
-      script_setup: "source {{home.stdout}}/.bash_profile"
+      script_setup: "export PATH={{home.stdout}}/local/bin:$PATH"
