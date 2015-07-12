@@ -2,4 +2,4 @@
 - hosts: julia_buildslaves
   sudo: no
   tasks:
-    - raw: export PATH=$(echo ~)/local/bin:$(echo ~)/local/sbin:$PATH; export LDFLAGS=-L$(echo ~)/local/lib:-L$(echo ~)/local/lib64; cd ~/buildbot; sandbox/bin/buildslave stop slave; sandbox/bin/buildslave start slave
+    - raw: export LD_LIBRARY_PATH=$(echo ~)/local/lib:$(echo ~)/local/lib64; export PATH=$(echo ~)/local/bin:$(echo ~)/local/sbin:$PATH; export LDFLAGS=-L$(echo ~)/local/lib:-L$(echo ~)/local/lib64; cd ~/buildbot; sandbox/bin/buildslave stop slave; sandbox/bin/buildslave start slave
