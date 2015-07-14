@@ -47,7 +47,7 @@
 
     # Actually build the big guy
     - file: path=~/src/gcc_build state=directory
-    - command: ~/src/gcc_source/gcc-5.1.0/configure --prefix=$HOME/local --with-gas=$HOME/local/bin/gas --enable-host-shared --enable-languages=c,c++,fortran --disable-multilib
+    - command: ~/src/gcc_source/gcc-5.1.0/configure --prefix=$HOME/local --with-gas=$HOME/local/bin/gas --enable-host-shared --enable-threads=posix --enable-languages=c,c++,fortran --disable-multilib
       args:
         chdir: ~/src/gcc_build
         creates: ~/src/gcc_build/Makefile
