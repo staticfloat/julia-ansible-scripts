@@ -1,0 +1,5 @@
+---
+- hosts: cache.julialang.org
+  sudo: no
+  tasks:
+    - raw: sudo service cache restart
