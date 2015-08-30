@@ -29,7 +29,7 @@
   sudo: yes
   roles:
     # You've gotta be first, la!
-    #- role: server
+    - role: server
     - role: julia_buildslave
 
 
@@ -42,16 +42,6 @@
     - shell: echo ~
       sudo: no
       register: home
-  roles:
-    - role: diamond
-      build_from_source: yes
-      influxdbhandler:
-        enable: True
-        host: graph.e.ip.saba.us
-        port: 8443
-        username: root
-        password: "{{ influxdb_root_password }}"
-        database: carbon
 
     # Also add startup role to run buildslave
     - role: startup_script
