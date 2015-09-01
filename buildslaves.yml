@@ -31,6 +31,8 @@
     # You've gotta be first, la!
     - role: server
     - role: julia_buildslave
+  post_tasks:
+    - authorized_key: user={{ansible_ssh_user}} key="{{ lookup('file', '~/etc/secure/ssh/julia_buildbot_rsa.pub') }}"
 
 
 - hosts: julia_buildslaves_linux
@@ -43,10 +45,10 @@
       sudo: no
       register: home
 
+  roles:
     # Also add startup role to run buildslave
     - role: startup_script
       service_name: buildslave
       chdir: "{{home.stdout}}/buildbot/slave"
-      daemon: "{{home.stdout}}/buildbot/sandbox/bin/buildslave"
+      daemon_name: "{{home.stdout}}/buildbot/sandbox/bin/buildslave"
       daemon_opts: "start --nodaemon"
-      #script_setup: "export PATH={{home.stdout}}/local/bin:$PATH; export LDFLAGS=-R{{home.stdout}}/local/lib"

@@ -1,9 +1,9 @@
 function Install-Cygwin {
     param ( $CygDir="c:\cygwin", $arch="x86")
 
-    # Generate random password
-    $Assembly = Add-Type -AssemblyName System.Web
-    $password = [System.Web.Security.Membership]::GeneratePassword(14,2)
+    # Generate random password (forcing a non-alphanumeric at the end because of policies
+    $password = (([char[]]([char]'a'..[char]'z') + 0..9 | sort {get-random})[0..12] -join '') + '.'
+    Write-Verbose "Not-so-secret password: $password"
 
     if(!(Test-Path -Path $CygDir -PathType Container)) {
         Write-Verbose "Creating directory $CygDir"
@@ -50,4 +50,7 @@ function Install-Cygwin {
     chmod 0600 ~/.ssh
 }
 
+$VerbosePreference = "Continue"
+
 Install-Cygwin -arch "x86"
+#Install-Cygwin -arch "x86_64"
