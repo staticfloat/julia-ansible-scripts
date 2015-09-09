@@ -25,7 +25,8 @@
         chdir: ~/src/binutils-2.25
         creates: ~/local/bin/gas
 
-- hosts: julia_buildslaves_linux
+# This is split out in case I want to install this on more than just the ancient buildbots
+- hosts: julia_buildslaves_ancient
   sudo: no
   tasks:
     - file: path=~/src state=directory

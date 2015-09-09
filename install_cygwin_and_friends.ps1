@@ -1,3 +1,13 @@
+function Disable-InternetExplorerESC {
+    $AdminKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
+    $UserKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}"
+    Set-ItemProperty -Path $AdminKey -Name "IsInstalled" -Value 0
+    Set-ItemProperty -Path $UserKey -Name "IsInstalled" -Value 0
+    Stop-Process -Name Explorer
+    Write-Verbose "IE Enhanced Security Configuration (ESC) has been disabled."
+}
+
+
 function Install-Cygwin {
     param ( $CygDir="c:\cygwin", $arch="x86")
 
@@ -13,7 +23,7 @@ function Install-Cygwin {
     $client = new-object System.Net.WebClient
     $client.DownloadFile("http://cygwin.com/setup-$arch.exe", "$CygDir\setup-$arch.exe" )
 
-    $pkg_list = "git,make,curl,patch,python,gcc-g++,m4,cmake,p7zip,openssh,nano,tmux"
+    $pkg_list = "git,make,curl,patch,python,gcc-g++,m4,cmake,p7zip,openssh,nano,tmux,cron,procps"
     if( $arch -eq "x86" ) {
         $pkg_list += ",mingw64-i686-gcc-g++,mingw64-i686-gcc-fortran"
     } else {
@@ -41,16 +51,26 @@ function Install-Cygwin {
         Write-Verbose "Creating directory $CygDir\home\Administrator\.ssh"
         New-Item -Type Directory -Path "$CygDir\home\Administrator\.ssh" -Force
     }
-    $client.DownloadFile("http://sophia.e.ip.saba.us/julia_rsa.pub", "$CygDir\home\Administrator\.ssh\authorized_keys" )
+    $client.DownloadFile("http://sophia.e.ip.saba.us/julia_buildbot_rsa.pub", "$CygDir\home\Administrator\.ssh\authorized_keys" )
 
     Write-Verbose "chown'ing authorized_keys"
     chown Administrator ~/.ssh/authorized_keys
     chmod 0600 ~/.ssh/authorized_keys
     chown Administrator ~/.ssh
     chmod 0600 ~/.ssh
+
+    Write-Verbose "Downloading and running Windows 10 SDK"
+    $client.DownloadFile( "http://download.microsoft.com/download/E/1/F/E1F1E61E-F3C6-4420-A916-FB7C47FBC89E/standalonesdk/sdksetup.exe", "$CygDir\home\Administrator\sdksetup.exe" )
+    Start-Process -FilePath "$CygDir\home\Administrator\sdksetup.exe"
+    if( $arch -eq "x86" ) {
+        bash --login -c 'echo export PATH=\"\\\"$PATH:/cygdrive/c/Program Files (x86)/Windows Kits/10/bin/x86\\\"\" >> /etc/profile'
+    } else {
+        bash --login -c 'echo export PATH=\"\\\"$PATH:/cygdrive/c/Program Files (x86)/Windows Kits/10/bin/x64\\\"\" >> /etc/profile'
+    }
 }
 
 $VerbosePreference = "Continue"
 
+Disable-InternetExplorerESC
 Install-Cygwin -arch "x86"
 #Install-Cygwin -arch "x86_64"

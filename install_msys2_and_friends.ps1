@@ -19,7 +19,7 @@ function Install-Msys2 {
         # install chocolatey and cmake
         Write-Verbose "Installing Chocolatey from https://chocolatey.org/install.ps1"
         iex ((new-object net.webclient).DownloadString("https://chocolatey.org/install.ps1"))
-        choco install -y cmake
+        choco install -y cmake.portable
 
         # pacman is picky, reinstall msys2 from scratch
         foreach ($dir in @("etc", "usr", "var", "mingw32")) {
@@ -46,7 +46,7 @@ function Install-Msys2 {
         Write-Verbose "Installing bash, pacman, pacman-mirrors and msys2-runtime"
         &$msyspath\usr\bin\sh -lc "pacman --noconfirm --force --needed -Sy bash pacman pacman-mirrors msys2-runtime"
 
-        $pkg_list = "diffutils git curl nano tmux m4 make patch tar p7zip openssh cygrunsrv mingw-w64-$arch-editrights"
+        $pkg_list = "diffutils git curl nano tmux m4 make patch tar p7zip openssh cygrunsrv mingw-w64-$arch-editrights procps"
         Write-Verbose "Installing $pkg_list"
         &$msyspath\usr\bin\sh -lc "pacman --noconfirm -Syu && pacman --noconfirm -S $pkg_list"
 
@@ -121,6 +121,8 @@ chown Administrator ~/.ssh
 chmod 0600 ~/.ssh
 '@
 }
+
+$VerbosePreference = "Continue"
 
 # Then, install Msys2 as either 64-bit or 32-bit
 Install-Msys2 -arch "i686"
