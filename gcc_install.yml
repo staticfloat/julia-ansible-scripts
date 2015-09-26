@@ -1,9 +1,10 @@
 ---
 # Download/install binutils on ancient buildslaves first
-- hosts: julia_buildslaves_ancient
+- hosts: buildslave_centos6.7-x64
   sudo: no
   tasks:
     - file: path=~/src state=directory
+    - file: path=~/local state=directory
 
     # Download binutils, get source all setup and ready to build
     - stat: path=~/src/binutils-2.25.tar.gz
@@ -26,10 +27,11 @@
         creates: ~/local/bin/gas
 
 # This is split out in case I want to install this on more than just the ancient buildbots
-- hosts: julia_buildslaves_ancient
+- hosts: buildslave_centos6.7-x64
   sudo: no
   tasks:
     - file: path=~/src state=directory
+    - file: path=~/local state=directory
 
     # Download GCC, get source all setup and ready to build
     - file: path=~/src/gcc_source state=directory

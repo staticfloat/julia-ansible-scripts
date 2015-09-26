@@ -1,0 +1,37 @@
+---
+# Download/install git on ancient buildslaves first
+- hosts: buildslave_centos6.7-x64
+  sudo: no
+  vars:
+    git_version: 2.5.3
+  tasks:
+    - file: path=~/src state=directory
+    - file: path=~/local state=directory
+
+    # Get build-depends
+    - yum: name="{{ item }}" state="latest"
+      with_items:
+        - curl-devel
+        - expat-devel
+        - gettext-devel
+        - openssl-devel
+        - zlib-devel
+        - gcc
+        - perl-ExtUtils-MakeMaker
+      sudo: yes
+
+    # Download git, get source all setup and ready to build
+    - stat: path=~/src/git-{{git_version}}.tar.gz
+      register: p
+    - get_url:
+        dest: ~/src
+        url: https://www.kernel.org/pub/software/scm/git/git-{{git_version}}.tar.gz
+      when: not p.stat.exists
+    - unarchive: copy=no src=~/src/git-{{git_version}}.tar.gz dest=~/src creates=~/src/git-{{git_version}}
+      when: not p.stat.exists
+
+    # Build git
+    - shell: make prefix=$HOME/local all && make prefix=$HOME/local install
+      args:
+        chdir: ~/src/git-{{git_version}}
+        creates: ~/local/bin/gcc
