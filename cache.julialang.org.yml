@@ -66,5 +66,5 @@
     # Also add startup role to run cache.julialang.org/server.py
     - role: startup_script
       service_name: cache
-      daemon: /usr/bin/python
+      daemon_name: /usr/bin/python
       daemon_opts: "{{home.stdout}}/cache.julialang.org/cache.py"
