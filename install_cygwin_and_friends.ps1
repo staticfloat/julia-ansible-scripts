@@ -72,5 +72,5 @@ function Install-Cygwin {
 $VerbosePreference = "Continue"
 
 Disable-InternetExplorerESC
-Install-Cygwin -arch "x86"
-#Install-Cygwin -arch "x86_64"
+#Install-Cygwin -arch "x86"
+Install-Cygwin -arch "x86_64"
