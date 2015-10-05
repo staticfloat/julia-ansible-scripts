@@ -1,33 +1,37 @@
 ---
 # Download/install binutils on ancient buildslaves first
-- hosts: buildslave_centos6.7-x64
+- hosts: all
   sudo: no
+  vars:
+    binutils_version: "2.25"
   tasks:
     - file: path=~/src state=directory
     - file: path=~/local state=directory
 
     # Download binutils, get source all setup and ready to build
-    - stat: path=~/src/binutils-2.25.tar.gz
+    - stat: path=~/src/binutils-{{binutils_version}}.tar.gz
       register: p
     - get_url:
         dest: ~/src
-        url: http://ftp.gnu.org/gnu/binutils/binutils-2.25.tar.gz
+        url: "http://ftp.gnu.org/gnu/binutils/binutils-{{binutils_version}}.tar.gz"
       when: not p.stat.exists
-    - unarchive: copy=no src=~/src/binutils-2.25.tar.gz dest=~/src creates=~/src/binutils-2.25
+    - unarchive: copy=no src=~/src/binutils-{{binutils_version}}.tar.gz dest=~/src creates=~/src/binutils-{{binutils_version}}
       when: not p.stat.exists
 
     # Build binutils
     - command: ./configure --prefix=$HOME/local
       args:
-        chdir: ~/src/binutils-2.25
-        creates: ~/src/binutils-2.25/Makefile
+        chdir: "~/src/binutils-{{binutils_version}}"
+        creates: "~/src/binutils-{{binutils_version}}/Makefile"
     - shell: make && make install
       args:
-        chdir: ~/src/binutils-2.25
+        chdir: ~/src/binutils-{{binutils_version}}
         creates: ~/local/bin/gas
 
 # This is split out in case I want to install this on more than just the ancient buildbots
-- hosts: buildslave_centos6.7-x64
+- hosts: all
+  vars:
+    gcc_version: "5.1.0"
   sudo: no
   tasks:
     - file: path=~/src state=directory
@@ -35,22 +39,22 @@
 
     # Download GCC, get source all setup and ready to build
     - file: path=~/src/gcc_source state=directory
-    - stat: path=~/src/gcc_source/gcc-5.1.0.tar.gz
+    - stat: path=~/src/gcc_source/gcc-{{gcc_version}}.tar.gz
       register: p
     - get_url:
         dest: ~/src/gcc_source
-        url: http://mirrors.concertpass.com/gcc/releases/gcc-5.1.0/gcc-5.1.0.tar.gz
+        url: "http://mirrors.concertpass.com/gcc/releases/gcc-{{gcc_version}}/gcc-5.1.0.tar.gz"
       when: not p.stat.exists
-    - unarchive: copy=no src=~/src/gcc_source/gcc-5.1.0.tar.gz dest=~/src/gcc_source/ creates=~/src/gcc_source/gcc-5.1.0
+    - unarchive: copy=no src=~/src/gcc_source/gcc-{{gcc_version}}.tar.gz dest=~/src/gcc_source/ creates=~/src/gcc_source/gcc-{{gcc_version}}
       when: not p.stat.exists
     - command: contrib/download_prerequisites
       args:
-        chdir: ~/src/gcc_source/gcc-5.1.0
-        creates: ~/src/gcc_source/gcc-5.1.0/isl-0.14
+        chdir: "~/src/gcc_source/gcc-{{gcc_version}}"
+        creates: "~/src/gcc_source/gcc-{{gcc_version}}/isl-0.14"
 
     # Actually build the big guy
     - file: path=~/src/gcc_build state=directory
-    - command: ~/src/gcc_source/gcc-5.1.0/configure --prefix=$HOME/local --with-gas=$HOME/local/bin/gas --enable-host-shared --enable-threads=posix --enable-languages=c,c++,fortran --disable-multilib
+    - command: ~/src/gcc_source/gcc-{{gcc_version}}/configure --prefix=$HOME/local --with-gas=$HOME/local/bin/gas --enable-host-shared --enable-threads=posix --enable-languages=c,c++,fortran --disable-multilib
       args:
         chdir: ~/src/gcc_build
         creates: ~/src/gcc_build/Makefile
