@@ -15,9 +15,9 @@
         - git
         - python
         - python-virtualenv
-        - gcc
         - python-dev
         - bzr
+        - devscripts
 
     - name: Update git repo
       git: repo=https://github.com/staticfloat/julia-buildbot.git update=yes dest="{{home.stdout}}/buildbot" accept_hostkey=yes
