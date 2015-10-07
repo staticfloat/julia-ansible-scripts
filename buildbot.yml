@@ -53,6 +53,12 @@
     - name: Copy buildbot_secret.py
       template: src=templates/buildbot_secret.py dest={{home.stdout}}/buildbot/master/buildbot_secret.py mode=0755
       sudo: no
+
+    - name: Copy gpg key
+      copy: src=~/.gnupg/sabae.key dest={{home.stdout}}/.gnupg/sabae.key owner=ubuntu mode=0600
+
+    - name: Copy ssh key
+      copy: src=~/etc/secure/ssh/id_rsa dest={{home.stdout}}/.ssh/id_rsa owner=ubuntu mode=0600
   roles:
     # Setup server stuff
     - role: server
