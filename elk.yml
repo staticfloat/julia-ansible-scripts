@@ -9,9 +9,10 @@
       sudo: no
 
   roles:
-    #- role: server
-    #  server_hostname: elk
+    - role: server
+      server_hostname: elk
 
+    # No options, no problems.
     - role: elk
 
     - role: nginx
@@ -49,6 +50,8 @@
     - command: update-rc.d elasticsearch defaults 95 10
       sudo: yes
     - service: name=elasticsearch state=started
+      sudo: yes
+    - service: name=logstash state=started
       sudo: yes
     - service: name=kibana state=started
       sudo: yes
