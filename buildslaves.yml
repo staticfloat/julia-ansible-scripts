@@ -20,7 +20,6 @@
     - repo-epel
 
 
-
 - hosts: julia_buildslaves
   vars_files:
     - secret/vars.yml
@@ -28,8 +27,6 @@
     PATH: "{{ansible_env.PATH}}:/usr/local/bin"
   sudo: yes
   roles:
-    # You've gotta be first, la!
-    - role: server
     - role: julia_buildslave
   post_tasks:
     - authorized_key: user={{ansible_ssh_user}} key="{{ lookup('file', '~/etc/secure/ssh/julia_buildbot_rsa.pub') }}"

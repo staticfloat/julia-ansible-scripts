@@ -1,0 +1,18 @@
+[submodule "roles/nginx"]
+	path = roles/nginx
+	url = https://github.com/staticfloat/ansible-role-nginx.git
+[submodule "roles/rundeck"]
+	path = roles/rundeck
+	url = https://github.com/staticfloat/ansible-rundeck.git
+[submodule "roles/julia_buildslave"]
+	path = roles/julia_buildslave
+	url = git@github.com:staticfloat/ansible-julia_buildslave.git
+[submodule "roles/grafana"]
+	path = roles/grafana
+	url = git@github.com:staticfloat/ansible-grafana.git
+[submodule "roles/influxdb"]
+	path = roles/influxdb
+	url = git@github.com:staticfloat/ansible-influxdb.git
+[submodule "roles/repo-epel"]
+	path = roles/repo-epel
+	url = git@github.com:staticfloat/ansible-role-repo-epel.git

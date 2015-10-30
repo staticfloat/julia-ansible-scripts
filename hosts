@@ -1,0 +1,45 @@
+[julia]
+julia_buildbot	 			ansible_ssh_host=128.52.185.127				ansible_ssh_user=ubuntu
+cache.julialang.org			ansible_ssh_host=128.52.178.53				ansible_ssh_user=ubuntu
+status.julialang.org		ansible_ssh_host=128.52.175.131				ansible_ssh_user=ubuntu
+
+[julia:children]
+julia_buildslaves
+
+[julia_buildslaves:children]
+julia_buildslaves_osx
+julia_buildslaves_ubuntu
+julia_buildslaves_centos
+julia_buildslaves_windows
+
+[julia_buildslaves_linux:children]
+julia_buildslaves_ubuntu
+julia_buildslaves_centos
+
+
+[julia_buildslaves_ubuntu]
+buildslave_ubuntu14.04-x86	ansible_ssh_host=128.52.186.125				ansible_ssh_user=ubuntu
+buildslave_ubuntu14.04-x64	ansible_ssh_host=128.52.185.130				ansible_ssh_user=ubuntu
+buildslave_ubuntu12.04-x86	ansible_ssh_host=128.52.186.124				ansible_ssh_user=ubuntu
+buildslave_ubuntu12.04-x64	ansible_ssh_host=128.52.185.129				ansible_ssh_user=ubuntu
+buildslave_ubuntu14.04-armv7l ansible_ssh_host=212.47.236.89            ansible_ssh_user=sabae
+
+[julia_buildslaves_windows]
+buildslave_win6.2-x86		ansible_ssh_host=128.52.185.210				ansible_ssh_user=Administrator
+buildslave_win6.2-x64		ansible_ssh_host=128.52.185.131				ansible_ssh_user=Administrator
+
+[julia_buildslaves_centos]
+buildslave_centos7.1-x64	ansible_ssh_host=128.52.185.212				ansible_ssh_user=centos
+buildslave_centos6.7-x64	ansible_ssh_host=128.52.185.48				ansible_ssh_user=centos
+
+[julia_buildslaves_centos:children]
+julia_buildslaves_ancient
+
+[julia_buildslaves_ancient]
+buildslave_centos5.11-x64	ansible_ssh_host=128.52.185.132				ansible_ssh_user=centos
+buildslave_centos5.11-x86 	ansible_ssh_host=128.52.180.3				ansible_ssh_user=centos
+
+[julia_buildslaves_osx]
+buildslave_osx10.9-x64 			ansible_ssh_host=criid.e.ip.saba.us	    ansible_ssh_user=osx		ansible_ssh_port=2222
+buildslave_osx10.10-x64			ansible_ssh_host=akatsuki.e.ip.saba.us	ansible_ssh_user=osx		ansible_ssh_port=2200
+buildslave_osx10.11-x64 		ansible_ssh_host=akatsuki.e.ip.saba.us	ansible_ssh_user=osx		ansible_ssh_port=2201

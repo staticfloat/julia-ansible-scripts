@@ -1,0 +1,28 @@
+---
+- name: Ensure /etc/init.d exists
+  file: path=/etc/init.d state=directory owner=root group=root mode=0755
+  sudo: yes
+  ignore_errors: true
+
+- name: Install init script
+  template: src=init.conf.j2 dest=/etc/init.d/{{service_name}} owner=root mode=0755
+  sudo: yes
+
+
+# Ensure the script gets run on startup
+- name: Add cron.d job for those distros that don't understand "service"
+  cron: name={{service_name}} special_time=reboot job="/etc/init.d/{{service_name}} start"
+  sudo: yes
+  when: ansible_os_family != "RedHat" and ansible_os_family != "Debian"
+
+- name: Enable {{servicename}} on startup for those distros that do understand "service"
+  service: name={{service_name}} enabled=yes
+  sudo: yes
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+
+
+# If we asked to start it immediately, do so!
+- name: Start {{service_name}}
+  shell: /etc/init.d/{{service_name}} start
+  when: start_immediately
+  sudo: yes
