@@ -1,0 +1,2 @@
+# Encrypt secret/vars.yml since it contains passwords
+secret/vars.yml filter=git-crypt diff=git-crypt
