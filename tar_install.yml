@@ -1,0 +1,39 @@
+---
+# Download/install tar on ancient buildslaves first
+- hosts: julia_buildslaves_ancient
+  sudo: no
+  vars:
+    tar_version: 1.28
+  tasks:
+    - file: path=~/src state=directory
+    - file: path=~/local state=directory
+
+    # Get build-depends
+    - yum: name="{{ item }}" state="latest"
+      with_items:
+        - zlib-devel
+        - gcc
+      sudo: yes
+
+    # Download tar, get source all setup and ready to build
+    - stat: path=~/src/tar-{{tar_version}}.tar.gz
+      register: p
+    - get_url:
+        dest: ~/src
+        url: http://ftp.gnu.org/gnu/tar/tar-{{tar_version}}.tar.gz
+      when: not p.stat.exists
+    - unarchive: copy=no src=~/src/tar-{{tar_version}}.tar.gz dest=~/src creates=~/src/tar-{{tar_version}}
+      when: not p.stat.exists
+
+    # Build tar
+    - command: ./configure --prefix=$HOME/local
+      args:
+        chdir: "~/src/tar-{{tar_version}}"
+        creates: "~/src/tar-{{tar_version}}/Makefile"
+    - shell: make && make install
+      args:
+        chdir: ~/src/tar-{{tar_version}}
+        creates: "~/local/bin/tar"
+
+    # Create gtar link
+    - file: src=~/local/bin/tar dest=~/local/bin/gtar state=link mode=0755

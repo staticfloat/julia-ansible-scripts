@@ -14,6 +14,7 @@
         - git
         - python-flask
         - python-boto
+        - python-httplib2
       sudo: yes
 
     # Also clone git repository to get cache server code, and setup tornado to serve at startup
@@ -28,31 +29,19 @@
     - role: nginx
       sudo: yes
       # Install SSL certificates
-      nginx_ssl_files:
-        cache.julialang.org:
-          key: "~/etc/secure/ssl/cache.julialang.org.key"
-          certs:
-            - "~/etc/secure/ssl/cache.julialang.org.crt"
-            - "~/etc/secure/ssl/startssl.chain.crt"
-        cache.e.ip.saba.us:
-          key: "~/etc/secure/ssl/cache.e.ip.saba.us.key"
-          certs:
-            - "~/etc/secure/ssl/cache.e.ip.saba.us.crt"
-            - "~/etc/secure/ssl/startssl.chain.crt"
+      nginx_letsencrypt:
+        - cache.julialang.org
       nginx_sites:
         # Create HTTP -> HTTPS redirection metaserver
-        ssl_redirect:
+        cache_ssl_redirect:
           - listen 80
-          - server_name cache.julialang.org *.cache.julialang.org cache.e.ip.saba.us *.cache.e.ip.saba.us
+          - server_name cache.julialang.org *.cache.julialang.org
           - return 301 https://$http_host$request_uri
 
         # Actual cache.julialang.org website configuration
         cache.julialang.org:
           - listen 443 ssl
-          #- listen 80
-          - server_name         cache.julialang.org *.cache.julialang.org cache.e.ip.saba.us *.cache.e.ip.saba.us
-          - ssl_certificate     ssl/cache.e.ip.saba.us.crt
-          - ssl_certificate_key ssl/cache.e.ip.saba.us.key
+          - server_name         cache.julialang.org *.cache.julialang.org
           - ssl_protocols       TLSv1 TLSv1.1 TLSv1.2
 
           # Send everything off to :5000, which is our python server

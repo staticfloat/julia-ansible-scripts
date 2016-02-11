@@ -16,10 +16,25 @@
         - uwsgi
       sudo: yes
 
-    # Also clone git repository to get cache server code, and setup tornado to serve at startup
+    # Also clone git repository to get webserver code, and setup tornado to serve at startup
     - name: Checkout status.julialang.org source to ~/status.julialang.org
-      git: repo=https://github.com/staticfloat/status.julialang.org.git
-           dest=~/status.julialang.org
+      git: repo=https://github.com/staticfloat/status.julialang.org.git dest=~/status.julialang.org
+
+    - name: Ensure ubuntu is in the www-data group
+      user: name=ubuntu groups=www-data append=yes
+      sudo: yes
+
+    - name: Set permissions of status.julialang.org/www/dashboard_project
+      file: path={{home.stdout}}/status.julialang.org/www/dashboard_project mode=0775
+      sudo: yes
+
+    - name: Set permissions of status.julialang.org/www/dashboard_project/data.db
+      file: path={{home.stdout}}/status.julialang.org/www/dashboard_project/data.db mode=0664
+      sudo: yes
+
+    - name: Set ownership of status.julialang.org
+      file: path={{home.stdout}}/status.julialang.org state=directory recurse=yes owner=ubuntu group=www-data
+      sudo: yes
 
     - name: Install uwsgi configuration
       template: src=templates/status.julialang.org.ini dest=/etc/uwsgi/apps-enabled/status.julialang.org.ini
@@ -29,40 +44,30 @@
       sudo: yes
 
   roles:
-    - role: server
-      server_hostname: status
-
     - role: nginx
       sudo: yes
       # Install SSL certificates
-      nginx_ssl_files:
-        status.julialang.org:
-          key: "~/etc/secure/ssl/status.julialang.org.key"
-          certs:
-            - "~/etc/secure/ssl/status.julialang.org.crt"
-            - "~/etc/secure/ssl/startssl.chain.crt"
+      nginx_letsencrypt:
+        - status.julialang.org
       nginx_sites:
         # Create HTTP -> HTTPS redirection metaserver
-        ssl_redirect:
+        status_ssl_redirect:
           - listen 80
           - server_name status.julialang.org *.status.julialang.org
           - return 301 https://$http_host$request_uri
 
-        # Actual cache.julialang.org website configuration
-        cache.julialang.org:
+        # Actual status.julialang.org website configuration
+        status.julialang.org:
           - listen 443 ssl
           - server_name         status.julialang.org
-          - ssl_certificate     ssl/status.julialang.org.crt
-          - ssl_certificate_key ssl/status.julialang.org.key
-          - ssl_protocols       TLSv1 TLSv1.1 TLSv1.2
 
           - location = / {
               rewrite ^$ /index.html break;
             }
 
-          - "location = /index.html {
+          - location = /index.html {
               alias {{home.stdout}}/status.julialang.org/www/dashboard_project/dashboard_project/sitestatic/html/index.html;
-            }"
+            }
           - location = /install-julia.sh {
               alias {{home.stdout}}status.julialang.org/www/dashboard_project/dashboard_project/sitestatic/install-julia.sh;
             }
