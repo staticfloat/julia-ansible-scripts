@@ -60,9 +60,6 @@
 
     - name: Copy gpg key
       copy: src=~/.gnupg/sabae.key dest={{home.stdout}}/.gnupg/sabae.key owner=ubuntu mode=0600
-
-    - name: Copy ssh key
-      copy: src=~/etc/secure/ssh/id_rsa dest={{home.stdout}}/.ssh/id_rsa owner=ubuntu mode=0600
   roles:
     # Setup server stuff
     - role: server
@@ -112,3 +109,7 @@
     - name: Install try_thrice
       copy: dest="{{home.stdout}}/bin" src=files/try_thrice mode=0755
       sudo: no
+
+    # Copy over julia RSA key
+    - name: Copy ssh key
+      copy: src=~/etc/secure/ssh/julia_buildbot_rsa dest={{home.stdout}}/.ssh/id_rsa owner=ubuntu mode=0600

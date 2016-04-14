@@ -1,8 +1,0 @@
----
-service_name: startup_script
-daemon_name: /bin/bash
-user: "{{ansible_ssh_user}}"
-daemon_opts: ""
-chdir: /
-start_immediately: yes
-script_setup: ""
