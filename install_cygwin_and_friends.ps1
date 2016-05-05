@@ -1,3 +1,9 @@
+# Open up Powershell ISE and run these commands to download and open this file
+#
+# Set-Location $env:userprofile\Desktop
+# Invoke-WebRequest -Uri "https://raw.githubusercontent.com/staticfloat/julia-ansible-scripts/master/install_cygwin_and_friends.ps1" -OutFile "install_cygwin_and_friends.ps1"
+# psEdit install_cygwin_and_friends.ps1
+
 function Disable-InternetExplorerESC {
     $AdminKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
     $UserKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}"
@@ -5,6 +11,13 @@ function Disable-InternetExplorerESC {
     Set-ItemProperty -Path $UserKey -Name "IsInstalled" -Value 0
     Stop-Process -Name Explorer
     Write-Verbose "IE Enhanced Security Configuration (ESC) has been disabled."
+}
+
+
+function EnableAutomaticUpdates {
+    $AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
+    $AUSettings.NotificationLevel = 4
+    $AUSettings.Save()
 }
 
 
@@ -29,7 +42,7 @@ function Install-Cygwin {
     } else {
         $pkg_list += ",mingw64-x86_64-gcc-g++,mingw64-x86_64-gcc-fortran"
     }
-   
+
     Write-Verbose "Installing Cygwin and $pkg_list"
     Start-Process -wait -FilePath "$CygDir\setup-$arch.exe" -ArgumentList "-q -g -l $CygDir -s http://mirror.mit.edu/cygwin/ -R c:\cygwin -P $pkg_list"
 
@@ -74,3 +87,4 @@ $VerbosePreference = "Continue"
 Disable-InternetExplorerESC
 #Install-Cygwin -arch "x86"
 Install-Cygwin -arch "x86_64"
+EnableAutomaticUpdates
