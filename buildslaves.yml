@@ -1,31 +1,36 @@
 ---
 - hosts: julia_buildslaves_ancient
   gather_facts: no
-  sudo: yes
+  become: true
   tasks:
     # Bootstrap legacy python 2.4 hosts
     - raw: yum -y install python-simplejson
 
 # cygwin/msys don't have a sudo, so let's fix that.
 - hosts: julia_buildslaves_windows
-  sudo: no
+  become: false
   tasks:
     - copy: dest=/usr/bin/sudo src=files/fakesudo mode=0755
 
 
 # Install EPEL on centos
 - hosts: julia_buildslaves_centos
-  sudo: yes
+  become: true
   roles:
     - repo-epel
 
+# Get PATH environment variable
+- hosts: julia_buildslaves
+  tasks:
+    - command: echo "$PATH"
+      register: default_path
 
 - hosts: julia_buildslaves
   vars_files:
     - secret/vars.yml
   environment:
-    PATH: "{{ansible_env.PATH}}:/usr/local/bin"
-  sudo: yes
+    PATH: "{{default_path.stdout}}:/usr/local/bin"
+  become: true
   roles:
     - role: julia_buildslave
   post_tasks:
@@ -35,17 +40,17 @@
 - hosts: julia_buildslaves_linux
   vars_files:
     - secret/vars.yml
-  sudo: yes
+  become: true
   pre_tasks:
     # Save home directory to "home" envvar
     - shell: echo ~
-      sudo: no
+      become: no
       register: home
 
   roles:
     # Also add startup role to run buildslave
     - role: startup_script
-      service_name: buildslave
+      servicename: buildslave
       script_setup: "export PATH={{home.stdout}}/local/bin:{{home.stdout}}/local/sbin:$PATH\nexport LD_LIBRARY_PATH={{home.stdout}}/local/lib:{{home.stdout}}/local/lib64:$LD_LIBRARY_PATH"
       chdir: "{{home.stdout}}/buildbot/slave"
       daemon_name: "{{home.stdout}}/buildbot/sandbox/bin/buildslave"
