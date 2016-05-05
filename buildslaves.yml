@@ -50,7 +50,7 @@
   roles:
     # Also add startup role to run buildslave
     - role: startup_script
-      servicename: buildslave
+      service_name: buildslave
       script_setup: "export PATH={{home.stdout}}/local/bin:{{home.stdout}}/local/sbin:$PATH\nexport LD_LIBRARY_PATH={{home.stdout}}/local/lib:{{home.stdout}}/local/lib64:$LD_LIBRARY_PATH"
       chdir: "{{home.stdout}}/buildbot/slave"
       daemon_name: "{{home.stdout}}/buildbot/sandbox/bin/buildslave"
