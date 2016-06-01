@@ -3,7 +3,6 @@
 - hosts: all
   become: no
   vars:
-    cmake_major_version: "3.5"
     cmake_version: "3.5.2"
   tasks:
     - file: path=~/src state=directory
