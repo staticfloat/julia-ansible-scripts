@@ -1,0 +1,33 @@
+---
+# Download/install cmake
+- hosts: all
+  become: no
+  vars:
+    cmake_major_version: "3.5"
+    cmake_version: "3.5.2"
+  tasks:
+    - file: path=~/src state=directory
+    - file: path=~/local state=directory
+
+    # Download cmake, get source all setup and ready to build
+    - stat: path=~/src/cmake-{{cmake_version}}.tar.gz
+      register: p
+    # Unfortunately, we can't use https here because the buildbots have an older Python version which doesn't support SNI
+    # See this URL for more information: https://github.com/ansible/ansible-modules-core/issues/1716
+    - get_url:
+        dest: ~/src
+        url: "http://cmake.org/files/v{{cmake_version | splitext | first}}/cmake-{{cmake_version}}.tar.gz"
+      when: not p.stat.exists
+    - unarchive: copy=no src=~/src/cmake-{{cmake_version}}.tar.gz dest=~/src creates=~/src/cmake-{{cmake_version}}
+      when: not p.stat.exists
+
+    # Build cmake
+    - command: ./configure --prefix=$HOME/local
+      args:
+        chdir: "~/src/cmake-{{cmake_version}}"
+        creates: "~/src/cmake-{{cmake_version}}/Makefile"
+    - shell: make && make install
+      args:
+        chdir: ~/src/cmake-{{cmake_version}}
+        creates: ~/local/bin/cmake
+
