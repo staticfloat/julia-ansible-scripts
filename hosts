@@ -1,6 +1,6 @@
-[julia]
-julia_buildbot	 			ansible_ssh_host=128.52.185.127				ansible_ssh_user=ubuntu
-cache.julialang.org			ansible_ssh_host=128.52.178.53				ansible_ssh_user=ubuntu
+julia]
+build.julialang.org	 		ansible_ssh_host=128.52.165.209				ansible_ssh_user=ubuntu
+cache.julialang.org			ansible_ssh_host=52.91.20.35				ansible_ssh_user=ubuntu
 status.julialang.org		ansible_ssh_host=128.52.175.131				ansible_ssh_user=ubuntu
 
 [julia:children]
@@ -19,14 +19,12 @@ julia_buildslaves_centos
 
 [julia_buildslaves_ubuntu]
 buildslave_ubuntu14.04-x86	ansible_ssh_host=128.52.186.125				ansible_ssh_user=ubuntu
-buildslave_ubuntu14.04-x64	ansible_ssh_host=128.52.185.130				ansible_ssh_user=ubuntu
-buildslave_ubuntu12.04-x86	ansible_ssh_host=128.52.186.124				ansible_ssh_user=ubuntu
-buildslave_ubuntu12.04-x64	ansible_ssh_host=128.52.185.129				ansible_ssh_user=ubuntu
+buildslave_ubuntu14.04-x64	ansible_ssh_host=128.52.188.48				ansible_ssh_user=ubuntu
 buildslave_ubuntu14.04-armv7l ansible_ssh_host=212.47.236.89            ansible_ssh_user=sabae
 
 [julia_buildslaves_windows]
-buildslave_win6.2-x86		ansible_ssh_host=128.52.185.210				ansible_ssh_user=Administrator
-buildslave_win6.2-x64		ansible_ssh_host=128.52.185.131				ansible_ssh_user=Administrator
+buildslave_win6.2-x86		ansible_ssh_host=128.52.188.49				ansible_ssh_user=Administrator
+buildslave_win6.2-x64		ansible_ssh_host=128.52.188.25				ansible_ssh_user=Administrator
 
 [julia_buildslaves_centos]
 buildslave_centos7.1-x64	ansible_ssh_host=128.52.185.212				ansible_ssh_user=centos
@@ -39,7 +37,9 @@ julia_buildslaves_ancient
 buildslave_centos5.11-x64	ansible_ssh_host=128.52.185.132				ansible_ssh_user=centos
 buildslave_centos5.11-x86 	ansible_ssh_host=128.52.180.3				ansible_ssh_user=centos
 
+# Note that these are often incorrect, as the port numbers depend on the order in which VMs are started
 [julia_buildslaves_osx]
-buildslave_osx10.9-x64 			ansible_ssh_host=criid.e.ip.saba.us	    ansible_ssh_user=osx		ansible_ssh_port=2222
-buildslave_osx10.10-x64			ansible_ssh_host=akatsuki.e.ip.saba.us	ansible_ssh_user=osx		ansible_ssh_port=2210
-buildslave_osx10.11-x64 		ansible_ssh_host=akatsuki.e.ip.saba.us	ansible_ssh_user=osx		ansible_ssh_port=2211
+buildslave_osx10.8-x64 			ansible_ssh_host=macmini2.julia.csail.mit.edu	ansible_ssh_user=vagrant	ansible_ssh_port=2201
+buildslave_osx10.9-x64 			ansible_ssh_host=macmini2.julia.csail.mit.edu	ansible_ssh_user=osx		ansible_ssh_port=2222
+buildslave_osx10.10-x64			ansible_ssh_host=macmini2.julia.csail.mit.edu	ansible_ssh_user=osx		ansible_ssh_port=2200
+
