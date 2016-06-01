@@ -37,9 +37,10 @@ julia_buildslaves_ancient
 buildslave_centos5.11-x64	ansible_ssh_host=128.52.185.132				ansible_ssh_user=centos
 buildslave_centos5.11-x86 	ansible_ssh_host=128.52.180.3				ansible_ssh_user=centos
 
-# Note that these are often incorrect, as the port numbers depend on the order in which VMs are started
+# These buildslaves are on macmini2.julia.csail.mit.edu, must manually map ports to connect remotely,
+# but usually are administered over VNC to the host
 [julia_buildslaves_osx]
-buildslave_osx10.8-x64 			ansible_ssh_host=macmini2.julia.csail.mit.edu	ansible_ssh_user=vagrant	ansible_ssh_port=2201
 buildslave_osx10.9-x64 			ansible_ssh_host=macmini2.julia.csail.mit.edu	ansible_ssh_user=osx		ansible_ssh_port=2222
 buildslave_osx10.10-x64			ansible_ssh_host=macmini2.julia.csail.mit.edu	ansible_ssh_user=osx		ansible_ssh_port=2200
+buildslave_osx10.11-x64			ansible_ssh_host=macmini2.julia.csail.mit.edu	ansible_ssh_user=osx		ansible_ssh_port=2201
 
