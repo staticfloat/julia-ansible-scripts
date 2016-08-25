@@ -1,9 +1,9 @@
 ---
 # Download/install python
 - hosts: all
-  sudo: no
+  become: no
   vars:
-    python_version: 2.7.10
+    python_version: 2.7.12
   tasks:
     - file: path=~/src state=directory
     - file: path=~/local state=directory
@@ -13,7 +13,15 @@
       with_items:
         - zlib-devel
         - gcc
-      sudo: yes
+      when: ansible_os_family == 'RedHat'
+      become: yes
+
+    - apt: name="{{ item }}" state="latest"
+      with_items:
+        - zlib1g-dev
+        - gcc
+      when: ansible_os_family == 'Debian'
+      become: yes
 
     # Download python, get source all setup and ready to build
     - stat: path=~/src/Python-{{python_version}}.tgz
@@ -36,3 +44,7 @@
       args:
         chdir: ~/src/Python-{{python_version}}
         creates: ~/local/bin/python
+
+    # Install pip
+    - get_url: url=https://bootstrap.pypa.io/get-pip.py dest=~/src/get-pip.py
+    - shell: ~/local/bin/python ~/src/get-pip.py
