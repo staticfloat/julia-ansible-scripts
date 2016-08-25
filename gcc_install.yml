@@ -1,9 +1,9 @@
 ---
 # Download/install binutils on ancient buildslaves first
 - hosts: all
-  sudo: no
+  become: no
   vars:
-    binutils_version: "2.25"
+    binutils_version: "2.27"
   tasks:
     - file: path=~/src state=directory
     - file: path=~/local state=directory
@@ -23,7 +23,7 @@
       args:
         chdir: "~/src/binutils-{{binutils_version}}"
         creates: "~/src/binutils-{{binutils_version}}/Makefile"
-    - shell: make && make install
+    - shell: make -j && make install
       args:
         chdir: ~/src/binutils-{{binutils_version}}
         creates: ~/local/bin/gas
@@ -31,8 +31,8 @@
 # This is split out in case I want to install this on more than just the ancient buildbots
 - hosts: all
   vars:
-    gcc_version: "5.1.0"
-  sudo: no
+    gcc_version: "6.2.0"
+  become: no
   tasks:
     - file: path=~/src state=directory
     - file: path=~/local state=directory
@@ -43,14 +43,14 @@
       register: p
     - get_url:
         dest: ~/src/gcc_source
-        url: "http://mirrors.concertpass.com/gcc/releases/gcc-{{gcc_version}}/gcc-5.1.0.tar.gz"
+        url: "http://mirrors.concertpass.com/gcc/releases/gcc-{{gcc_version}}/gcc-{{gcc_version}}.tar.gz"
       when: not p.stat.exists
     - unarchive: copy=no src=~/src/gcc_source/gcc-{{gcc_version}}.tar.gz dest=~/src/gcc_source/ creates=~/src/gcc_source/gcc-{{gcc_version}}
       when: not p.stat.exists
     - command: contrib/download_prerequisites
       args:
         chdir: "~/src/gcc_source/gcc-{{gcc_version}}"
-        creates: "~/src/gcc_source/gcc-{{gcc_version}}/isl-0.14"
+        creates: "~/src/gcc_source/gcc-{{gcc_version}}/isl-0.15"
 
     # Actually build the big guy
     - file: path=~/src/gcc_build state=directory
@@ -58,7 +58,7 @@
       args:
         chdir: ~/src/gcc_build
         creates: ~/src/gcc_build/Makefile
-    - command: make -j2
+    - command: make -j
       args:
         chdir: ~/src/gcc_build
         creates: ~/src/gcc_build/gcc/xgcc
