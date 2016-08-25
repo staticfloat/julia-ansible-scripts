@@ -29,6 +29,7 @@ buildslave_win6.2-x64		ansible_ssh_host=128.52.188.25				ansible_ssh_user=Admini
 [julia_buildslaves_centos]
 buildslave_centos7.1-x64	ansible_ssh_host=128.52.185.212				ansible_ssh_user=centos
 buildslave_centos6.7-x64	ansible_ssh_host=128.52.185.48				ansible_ssh_user=centos
+buildslave_centos7.2-ppc64le    ansible_ssh_host=ibm-power2.cgrb.oregonstate.edu        ansible_ssh_user=vinchhid   ansible_ssh_port=732
 
 [julia_buildslaves_centos:children]
 julia_buildslaves_ancient
@@ -40,7 +41,6 @@ buildslave_centos5.11-x86 	ansible_ssh_host=128.52.180.3				ansible_ssh_user=cen
 # These buildslaves are on macmini2.julia.csail.mit.edu, must manually map ports to connect remotely,
 # but usually are administered over VNC to the host
 [julia_buildslaves_osx]
-buildslave_osx10.9-x64 			ansible_ssh_host=macmini2.julia.csail.mit.edu	ansible_ssh_user=osx		ansible_ssh_port=2222
-buildslave_osx10.10-x64			ansible_ssh_host=macmini2.julia.csail.mit.edu	ansible_ssh_user=osx		ansible_ssh_port=2200
-buildslave_osx10.11-x64			ansible_ssh_host=macmini2.julia.csail.mit.edu	ansible_ssh_user=osx		ansible_ssh_port=2201
-
+uildslave_osx10.9-x64 			ansible_ssh_host=osx10.9-x64.e.ip.saba.us   ansible_ssh_user=osx
+buildslave_osx10.10-x64			ansible_ssh_host=osx10.10-x64.e.ip.saba.us	ansible_ssh_user=osx
+buildslave_osx10.11-x64 		ansible_ssh_host=osx11.11-x64.e.ip.saba.us	ansible_ssh_user=osx
