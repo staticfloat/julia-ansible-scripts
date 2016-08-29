@@ -1,0 +1,111 @@
+---
+- hosts: mattermost.julialang.org
+  vars_files:
+    - secret/vars.yml
+  vars:
+    mattermost_version: "3.3.0"
+  pre_tasks:
+    # Save home directory to "home" variable
+    - shell: echo ~
+      register: home
+
+    - name: Install packages
+      apt: name={{item}} state=latest
+      become: yes
+      with_items:
+        - postgresql
+        - postgresql-contrib
+        - libpq-dev
+        - python-psycopg2
+        - python-urllib3
+        - python-openssl
+        - python-pyasn1
+        - python-pip
+        - python-dev
+
+    - name: Install python packages
+      pip: name={{item}} state=latest
+      become: yes
+      with_items:
+        - ndg-httpsclient
+
+    - name: Create mattermost postgresql database
+      become: yes
+      become_user: postgres
+      postgresql_db: name=mattermost
+
+    - name: Create mattermost postgresql user
+      become: yes
+      become_user: postgres
+      postgresql_user: name=mmuser password={{postgresql_mmuser_password}} db=mattermost
+
+    - file: path=~/src state=directory
+
+    - command: curl -L https://releases.mattermost.com/{{mattermost_version}}/mattermost-team-{{mattermost_version}}-linux-amd64.tar.gz -o ~/src/mattermost-team-{{mattermost_version}}.tar.gz
+      args:
+        creates: ~/src/mattermost-team-{{mattermost_version}}.tar.gz
+
+    - stat: path=~/src/mattermost
+      register: p
+
+    - unarchive: copy=no src=~/src/mattermost-team-{{mattermost_version}}.tar.gz dest=~/src creates=~/src/mattermost-{{mattermost_version}}
+
+    - replace:
+        dest: "{{home.stdout}}/src/mattermost/config/config.json"
+        regexp: '("DriverName"): "mysql",'
+        replace: '\1: "postgres",'
+    - replace:
+        dest: "{{home.stdout}}/src/mattermost/config/config.json"
+        regexp: '("DataSource"): "[^"]+",'
+        replace: '\1: "postgres://mmuser:{{postgresql_mmuser_password}}@localhost:5432/mattermost?sslmode=disable&connect_timeout=10",'
+
+    - git: repo=https://github.com/numberly/mattermost-integration-giphy.git update=yes dest="{{home.stdout}}/src/mattermost-integration-giphy" accept_hostkey=yes
+    - command: python setup.py install
+      become: yes
+      args:
+        chdir: "{{home.stdout}}/src/mattermost-integration-giphy"
+  roles:
+    - role: nginx
+      become: yes
+      nginx_letsencrypt:
+        #- mattermost.julialang.org
+        - mattermost.e.ip.saba.us
+      nginx_sites:
+        # Create HTTP -> HTTPS redirection metaserver
+        mattermost_ssl_redirect:
+          - listen 80
+          - server_name _ #mattermost.julialang.org *.mattermost.julialang.org
+          #- return 301 https://$http_host$request_uri
+          - return 301 https://mattermost.e.ip.saba.us$request_uri
+
+        # Actual mattermost website configuration
+        #mattermost.julialang.org:
+        mattermost.e.ip.saba.us:
+          - listen 443 ssl
+          - server_name         _ #mattermost.julialang.org *.mattermost.julialang.org
+
+          # Proxy everything off to mattermost
+          - location / {
+              client_max_body_size 50M;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection "upgrade";
+              proxy_set_header Host $http_host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+              proxy_set_header X-Frame-Options SAMEORIGIN;
+              proxy_pass http://localhost:8065;
+            }
+
+    # Also add startup role to run buildslave
+    - role: startup_script
+      service_name: mattermost
+      chdir: "{{home.stdout}}/src/mattermost/bin"
+      daemon_name: "{{home.stdout}}/src/mattermost/bin/platform"
+
+    - role: startup_script
+      service_name: mattermost_giphy
+      script_setup: "export MATTERMOST_GIPHY_TOKEN={{mattermost_giphy_token}}; export MATTERMOST_GIPHY_HOST=localhost; export MATTERMOST_GIPHY_PORT=5000"
+      chdir: "{{home.stdout}}/src/mattermost-integration-giphy"
+      daemon_name: "/usr/bin/python"
+      daemon_opts: "run.py"
