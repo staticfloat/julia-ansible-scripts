@@ -39,9 +39,8 @@ julia_buildslaves_ancient
 buildslave_centos5.11-x64	ansible_ssh_host=128.52.185.132				ansible_ssh_user=centos
 buildslave_centos5.11-x86 	ansible_ssh_host=128.52.180.3				ansible_ssh_user=centos
 
-# These buildslaves are on macmini2.julia.csail.mit.edu, must manually map ports to connect remotely,
-# but usually are administered over VNC to the host
+# These buildslaves are on macmini2.julia.csail.mit.edu, but get their own IP addresses
 [julia_buildslaves_osx]
-uildslave_osx10.9-x64 			ansible_ssh_host=osx10.9-x64.e.ip.saba.us   ansible_ssh_user=osx
+buildslave_osx10.9-x64 			ansible_ssh_host=osx10.9-x64.e.ip.saba.us   ansible_ssh_user=osx
 buildslave_osx10.10-x64			ansible_ssh_host=osx10.10-x64.e.ip.saba.us	ansible_ssh_user=osx
-buildslave_osx10.11-x64 		ansible_ssh_host=osx11.11-x64.e.ip.saba.us	ansible_ssh_user=osx
+buildslave_osx10.11-x64 		ansible_ssh_host=osx10.11-x64.e.ip.saba.us	ansible_ssh_user=osx
