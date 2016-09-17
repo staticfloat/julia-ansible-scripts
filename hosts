@@ -2,7 +2,6 @@ julia]
 build.julialang.org	 		ansible_ssh_host=128.52.165.209				ansible_ssh_user=ubuntu
 cache.julialang.org			ansible_ssh_host=52.91.20.35				ansible_ssh_user=ubuntu
 status.julialang.org		ansible_ssh_host=128.52.175.131				ansible_ssh_user=ubuntu
-mattermost.julialang.org    ansible_ssh_host=128.52.178.250             ansible_ssh_user=ubuntu
 
 [julia:children]
 julia_buildslaves
@@ -21,7 +20,7 @@ julia_buildslaves_centos
 [julia_buildslaves_ubuntu]
 buildslave_ubuntu14.04-x86	ansible_ssh_host=128.52.186.125				ansible_ssh_user=ubuntu
 buildslave_ubuntu14.04-x64	ansible_ssh_host=128.52.188.48				ansible_ssh_user=ubuntu
-buildslave_ubuntu14.04-armv7l ansible_ssh_host=212.47.236.89            ansible_ssh_user=sabae
+buildslave_ubuntu14.04-armv7l ansible_ssh_host=212.47.236.89      ansible_ssh_user=sabae
 
 [julia_buildslaves_windows]
 buildslave_win6.2-x86		ansible_ssh_host=128.52.188.49				ansible_ssh_user=Administrator

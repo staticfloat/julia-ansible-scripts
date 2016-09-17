@@ -1,12 +1,10 @@
 ---
 - hosts: build.julialang.org
-  sudo: yes
   vars_files:
     - secret/vars.yml
   pre_tasks:
     # Save home directory to "home" variable
     - shell: echo ~
-      sudo: no
       register: home
 
     - name: Install packages
@@ -18,45 +16,34 @@
         - python-dev
         - bzr
         - devscripts
+      become: yes
 
     - name: Update git repo
       git: repo=https://github.com/staticfloat/julia-buildbot.git update=yes dest="{{home.stdout}}/buildbot" accept_hostkey=yes
-      sudo: no
-
-    - name: Install launch_github.sh
-      template: src=templates/launch_github.sh dest={{home.stdout}}/buildbot/unlock_keychain.sh mode=0755
-      sudo: no
 
     - name: Check if buildbot is already installed
       stat: path={{home.stdout}}/buildbot/sandbox/bin/buildbot
       register: buildbot
-      sudo: no
 
     - name: Stop buildbot if it's already running
       shell: chdir={{home.stdout}}/buildbot sandbox/bin/buildbot stop master
       when: buildbot.stat.exists == True
       ignore_errors: yes
-      sudo: no
 
     - name: Install virtualenv to ~/buildbot/sandbox
       shell: chdir={{home.stdout}}/buildbot virtualenv --no-site-packages sandbox
-      sudo: no
 
     - name: Install buildbot to ~/buildbot/sandbox
       pip: name=buildbot virtualenv={{home.stdout}}/buildbot/sandbox state=latest
-      sudo: no
 
     - name: Configure buildbot
       shell: chdir=~/buildbot sandbox/bin/buildbot create-master master
-      sudo: no
 
     - name: Copy buildbot_secret.py
       template: src=templates/buildbot_secret.py dest={{home.stdout}}/buildbot/master/buildbot_secret.py mode=0755
-      sudo: no
 
     - name: Create ~/.gnupg
       file: path=~/.gnupg state=directory
-      sudo: no
 
     - name: Copy gpg key
       copy: src=~/.gnupg/sabae.key dest={{home.stdout}}/.gnupg/sabae.key owner=ubuntu mode=0600
@@ -66,7 +53,7 @@
       server_hostname: buildbot
 
     - role: nginx
-      sudo: yes
+      become: yes
       # Install SSL certificates
       nginx_letsencrypt:
         - build.julialang.org
@@ -80,7 +67,7 @@
         # Actual build.julialang.org website configuration
         build.julialang.org:
           - listen 443 ssl
-          - server_name         build.julialang.org *.build.julialang.org
+          - server_name build.julialang.org *.build.julialang.org
 
           # Send everything off to :8010, which is our buildbot server
           - location / {
@@ -89,12 +76,14 @@
 
     # Also add startup role to run github_buildbot.py
     - role: startup_script
+      become: yes
       service_name: github_buildbot
       chdir: "{{home.stdout}}/buildbot"
       daemon_name: /bin/bash
       daemon_opts: ./launch_github.sh
 
     - role: startup_script
+      become: yes
       service_name: buildbot
       chdir: "{{home.stdout}}/buildbot/master"
       daemon_name: "{{home.stdout}}/buildbot/sandbox/bin/buildbot"
@@ -103,13 +92,12 @@
     # Copy over AWS credentials!
     - name: Copy over AWS credentials
       copy: dest="{{home.stdout}}/.awssecret" src=~/etc/secure/s3/julia-buildbot.s3key mode=0600
-      sudo: no
 
     # Install try_thrice
     - name: Install try_thrice
       copy: dest="{{home.stdout}}/bin" src=files/try_thrice mode=0755
-      sudo: no
 
     # Copy over julia RSA key
     - name: Copy ssh key
       copy: src=~/etc/secure/ssh/julia_buildbot_rsa dest={{home.stdout}}/.ssh/id_rsa owner=ubuntu mode=0600
+      become: yes
