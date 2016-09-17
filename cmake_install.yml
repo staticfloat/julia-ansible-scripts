@@ -3,7 +3,7 @@
 - hosts: all
   become: no
   vars:
-    cmake_version: "3.5.2"
+    cmake_version: "3.6.2"
   tasks:
     - file: path=~/src state=directory
     - file: path=~/local state=directory
@@ -29,4 +29,3 @@
       args:
         chdir: ~/src/cmake-{{cmake_version}}
         creates: ~/local/bin/cmake
-
