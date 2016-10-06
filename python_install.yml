@@ -12,6 +12,7 @@
     - yum: name="{{ item }}" state="latest"
       with_items:
         - zlib-devel
+        - bzip2-devel
         - gcc
       when: ansible_os_family == 'RedHat'
       become: yes
@@ -19,6 +20,7 @@
     - apt: name="{{ item }}" state="latest"
       with_items:
         - zlib1g-dev
+        - libbz2-dev
         - gcc
       when: ansible_os_family == 'Debian'
       become: yes
@@ -30,6 +32,9 @@
         dest: ~/src
         url: https://www.python.org/ftp/python/{{python_version}}/Python-{{python_version}}.tgz
       when: not p.stat.exists
+
+    - stat: path=~/src/Python-{{python_version}}
+      register: p
     - unarchive: copy=no src=~/src/Python-{{python_version}}.tgz dest=~/src creates=~/src/Python-{{python_version}}
       when: not p.stat.exists
 
@@ -48,3 +53,6 @@
     # Install pip
     - get_url: url=https://bootstrap.pypa.io/get-pip.py dest=~/src/get-pip.py
     - shell: ~/local/bin/python ~/src/get-pip.py
+
+    # Install virtualenv
+    - shell: ~/local/bin/pip install virtualenv
