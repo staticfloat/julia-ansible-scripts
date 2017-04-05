@@ -1,0 +1,53 @@
+---
+# Download/install gdb
+- hosts: all
+  become: no
+  vars:
+    gdb_version: 7.12
+  tasks:
+    - file: path=~/src state=directory
+    - file: path=~/local state=directory
+
+    # Get build-depends
+    - yum: name="{{ item }}" state="latest"
+      with_items:
+        - gcc
+        - texinfo
+      when: ansible_os_family == 'RedHat'
+      become: yes
+
+    - apt: name="{{ item }}" state="latest"
+      with_items:
+        - gcc
+        - texinfo
+      when: ansible_os_family == 'Debian'
+      become: yes
+
+    # Download gdb, get source all setup and ready to build
+    - stat: path=~/src/gdb-{{gdb_version}}.tar.gz
+      register: p
+    - get_url:
+        dest: ~/src
+        url: https://ftp.gnu.org/gnu/gdb/gdb-{{gdb_version}}.tar.gz
+      when: not p.stat.exists
+
+    - stat: path=~/src/gdb-{{gdb_version}}
+      register: p
+    - unarchive: copy=no src=~/src/gdb-{{gdb_version}}.tar.gz dest=~/src creates=~/src/gdb-{{gdb_version}}
+      when: not p.stat.exists
+
+    # Configure
+    - shell: ./configure --prefix=$HOME/local
+      args:
+        chdir: ~/src/gdb-{{gdb_version}}
+        creates: ~/src/gdb-{{gdb_version}}/Makefile
+
+    - shell: make
+      args:
+        chdir: ~/src/gdb-{{gdb_version}}
+        creates: ~/src/gdb-{{gdb_version}}/gdb/gdb
+
+    - shell: make install
+      args:
+        chdir: ~/src/gdb-{{gdb_version}}
+        creates: ~/local/bin/gdb

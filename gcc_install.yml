@@ -58,7 +58,7 @@
       args:
         chdir: ~/src/gcc_build
         creates: ~/src/gcc_build/Makefile
-    - command: make -j
+    - command: make
       args:
         chdir: ~/src/gcc_build
         creates: ~/src/gcc_build/gcc/xgcc

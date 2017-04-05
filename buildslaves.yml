@@ -25,11 +25,15 @@
     - command: echo "$PATH"
       register: default_path
 
+    - command: echo "$HOME"
+      become: no
+      register: home_path
+
 - hosts: julia_buildslaves
   vars_files:
     - secret/vars.yml
   environment:
-    PATH: "{{default_path.stdout}}:/usr/local/bin"
+    PATH: "{{home_path.stdout}}/local/bin:{{default_path.stdout}}:/usr/local/bin"
   become: true
   roles:
     - role: julia_buildslave
@@ -50,8 +54,8 @@
   roles:
     # Also add startup role to run buildslave
     - role: startup_script
-      service_name: buildslave
+      service_name: buildworker
       script_setup: "export PATH={{home.stdout}}/local/bin:{{home.stdout}}/local/sbin:$PATH\nexport LD_LIBRARY_PATH={{home.stdout}}/local/lib:{{home.stdout}}/local/lib64:$LD_LIBRARY_PATH"
-      chdir: "{{home.stdout}}/buildbot/slave"
-      daemon_name: "{{home.stdout}}/buildbot/sandbox/bin/buildslave"
+      chdir: "{{home.stdout}}/buildbot/worker"
+      daemon_name: "{{home.stdout}}/buildbot/sandbox/bin/buildbot-worker"
       daemon_opts: "start --nodaemon"

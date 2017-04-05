@@ -1,7 +1,16 @@
 ---
-- hosts: build.julialang.org
+# Get PATH environment variable
+- hosts: buildtest.e.ip.saba.us
+  tasks:
+    - command: echo "$PATH"
+      register: default_path
+
+#- hosts: build.julialang.org
+- hosts: buildtest.e.ip.saba.us
   vars_files:
     - secret/vars.yml
+  environment:
+    PATH: "/home/ubuntu/local/bin:{{default_path.stdout}}"
   pre_tasks:
     # Save home directory to "home" variable
     - shell: echo ~
@@ -14,12 +23,14 @@
         - python
         - python-virtualenv
         - python-dev
+        - libsqlite3-dev
         - bzr
         - devscripts
+        - libssl-dev
       become: yes
 
     - name: Update git repo
-      git: repo=https://github.com/staticfloat/julia-buildbot.git update=yes dest="{{home.stdout}}/buildbot" accept_hostkey=yes
+      git: repo=https://github.com/staticfloat/julia-buildbot.git update=yes dest="{{home.stdout}}/buildbot" accept_hostkey=yes version=level_up
 
     - name: Check if buildbot is already installed
       stat: path={{home.stdout}}/buildbot/sandbox/bin/buildbot
@@ -33,8 +44,16 @@
     - name: Install virtualenv to ~/buildbot/sandbox
       shell: chdir={{home.stdout}}/buildbot virtualenv --no-site-packages sandbox
 
-    - name: Install buildbot to ~/buildbot/sandbox
-      pip: name=buildbot virtualenv={{home.stdout}}/buildbot/sandbox state=latest
+    - name: Install python packages to ~/buildbot/sandbox
+      pip: name={{item}} virtualenv={{home.stdout}}/buildbot/sandbox state=latest
+      with_items:
+        - buildbot[tls]
+        - buildbot-www
+        - buildbot-waterfall-view
+        - buildbot-console-view
+        - urllib3[secure]
+        - requests
+        - ipython
 
     - name: Configure buildbot
       shell: chdir=~/buildbot sandbox/bin/buildbot create-master master
@@ -50,37 +69,43 @@
   roles:
     # Setup server stuff
     - role: server
-      server_hostname: buildbot
+      #server_hostname: buildbot
+      server_hostname: buildtest
 
     - role: nginx
       become: yes
       # Install SSL certificates
       nginx_letsencrypt:
-        - build.julialang.org
+        - "{{inventory_hostname}}"
       nginx_sites:
         # Create HTTP -> HTTPS redirection metaserver
         build_ssl_redirect:
           - listen 80
-          - server_name build.julialang.org *.build.julialang.org
+          - server_name {{inventory_hostname}} *.{{inventory_hostname}}
           - return 301 https://$http_host$request_uri
 
         # Actual build.julialang.org website configuration
-        build.julialang.org:
+        buildtest.e.ip.saba.us:
           - listen 443 ssl
-          - server_name build.julialang.org *.build.julialang.org
+          - server_name {{inventory_hostname}} *.{{inventory_hostname}}
 
           # Send everything off to :8010, which is our buildbot server
           - location / {
-              proxy_pass http://127.0.0.1:8010;
+              proxy_pass http://localhost:8010;
             }
 
-    # Also add startup role to run github_buildbot.py
-    - role: startup_script
-      become: yes
-      service_name: github_buildbot
-      chdir: "{{home.stdout}}/buildbot"
-      daemon_name: /bin/bash
-      daemon_opts: ./launch_github.sh
+          - location /sse {
+              proxy_buffering off;
+              proxy_pass http://localhost:8010/sse/;
+            }
+
+          - location /ws {
+              proxy_http_version 1.1;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection "upgrade";
+              proxy_pass http://localhost:8010/ws;
+              proxy_read_timeout 6000s;
+            }
 
     - role: startup_script
       become: yes

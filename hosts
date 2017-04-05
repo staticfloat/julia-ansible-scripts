@@ -1,7 +1,8 @@
-julia]
-build.julialang.org	 		ansible_ssh_host=128.52.165.209				ansible_ssh_user=ubuntu
-cache.julialang.org			ansible_ssh_host=52.91.20.35				ansible_ssh_user=ubuntu
-status.julialang.org		ansible_ssh_host=128.52.175.131				ansible_ssh_user=ubuntu
+[julia]
+build.julialang.org                     ansible_ssh_host=128.52.165.209 ansible_ssh_user=ubuntu
+cache.julialang.org                     ansible_ssh_host=52.91.20.35	ansible_ssh_user=ubuntu
+status.julialang.org		            ansible_ssh_host=128.52.175.131	ansible_ssh_user=ubuntu
+buildtest.e.ip.saba.us	                ansible_ssh_host=128.52.172.158	ansible_ssh_user=ubuntu
 
 [julia:children]
 julia_buildslaves
@@ -18,28 +19,41 @@ julia_buildslaves_centos
 
 
 [julia_buildslaves_ubuntu]
-buildslave_ubuntu14.04-x86	ansible_ssh_host=128.52.186.125				ansible_ssh_user=ubuntu
-buildslave_ubuntu14.04-x64	ansible_ssh_host=128.52.188.48				ansible_ssh_user=ubuntu
-buildslave_ubuntu14.04-armv7l ansible_ssh_host=212.47.236.89      ansible_ssh_user=sabae
+buildslave_ubuntu14.04-x86              ansible_ssh_host=128.52.186.125 ansible_ssh_user=ubuntu
+buildslave_ubuntu14.04-x64              ansible_ssh_host=128.52.188.48  ansible_ssh_user=ubuntu
+buildslave_ubuntu14.04-armv7l           ansible_ssh_host=212.47.236.89  ansible_ssh_user=sabae
+buildtest_ubuntu14.04-x64               ansible_ssh_host=128.52.172.193 ansible_ssh_user=ubuntu
+buildtest_ubuntu14.04-x86               ansible_ssh_host=128.52.172.192 ansible_ssh_user=ubuntu
 
 [julia_buildslaves_windows]
-buildslave_win6.2-x86		ansible_ssh_host=128.52.188.49				ansible_ssh_user=Administrator
-buildslave_win6.2-x64		ansible_ssh_host=128.52.188.25				ansible_ssh_user=Administrator
+buildslave_win6.2-x86                   ansible_ssh_host=128.52.188.49  ansible_ssh_user=Administrator
+buildslave_win6.2-x64                   ansible_ssh_host=128.52.188.25  ansible_ssh_user=Administrator
+buildtest_win6.2-x64                    ansible_ssh_host=128.52.178.8   ansible_ssh_user=Administrator
 
 [julia_buildslaves_centos]
-buildslave_centos7.1-x64	ansible_ssh_host=128.52.185.212				ansible_ssh_user=centos
-buildslave_centos6.7-x64	ansible_ssh_host=128.52.185.48				ansible_ssh_user=centos
-buildslave_centos7.2-ppc64le    ansible_ssh_host=ibm-power2.cgrb.oregonstate.edu        ansible_ssh_user=juliabuild   ansible_ssh_port=732
+buildslave_centos7.1-x64                ansible_ssh_host=128.52.185.212 ansible_ssh_user=centos
+buildslave_centos6.7-x64                ansible_ssh_host=128.52.185.48  ansible_ssh_user=centos
+buildslave_centos7.2-ppc64le            ansible_ssh_host=128.193.83.27  ansible_ssh_user=juliabuild ansible_ssh_port=732 #hosted at ibm-power2.cgrb.oregonstate.edu
+buildtest_centos6.7-x64                 ansible_ssh_host=128.52.172.194 ansible_ssh_user=centos
+buildtest_centos7.1-x64                 ansible_ssh_host=128.52.173.3   ansible_ssh_user=centos
+buildtest_centos7.1-aarch64             ansible_ssh_host=174.63.82.99   ansible_ssh_user=centos ansible_ssh_port=17656
+buildslave_debian7.11-arm               ansible_ssh_host=174.63.82.99   ansible_ssh_user=debian ansible_ssh_port=17657
+buildtest_debian7.11-arm                ansible_ssh_host=174.63.82.99   ansible_ssh_user=buildtest ansible_ssh_port=17657
 
 [julia_buildslaves_centos:children]
 julia_buildslaves_ancient
 
 [julia_buildslaves_ancient]
-buildslave_centos5.11-x64	ansible_ssh_host=128.52.185.132				ansible_ssh_user=centos
-buildslave_centos5.11-x86 	ansible_ssh_host=128.52.180.3				ansible_ssh_user=centos
+buildslave_centos5.11-x64               ansible_ssh_host=128.52.170.17 ansible_ssh_user=centos
+buildslave_centos5.11-x86               ansible_ssh_host=128.52.180.3   ansible_ssh_user=centos
+buildtest_centos5.11-x64                ansible_ssh_host=128.52.173.0   ansible_ssh_user=centos
+buildtest_centos5.11-x86                ansible_ssh_host=128.52.173.1   ansible_ssh_user=centos
 
 # These buildslaves are on macmini2.julia.csail.mit.edu, but get their own IP addresses
 [julia_buildslaves_osx]
-buildslave_osx10.9-x64 			ansible_ssh_host=osx10.9-x64.e.ip.saba.us   ansible_ssh_user=osx
-buildslave_osx10.10-x64			ansible_ssh_host=osx10.10-x64.e.ip.saba.us	ansible_ssh_user=osx
-buildslave_osx10.11-x64 		ansible_ssh_host=osx10.11-x64.e.ip.saba.us	ansible_ssh_user=osx
+buildslave_osx10.9-x64                  ansible_ssh_host=osx10.9-x64.e.ip.saba.us   ansible_ssh_user=osx
+buildslave_osx10.10-x64                 ansible_ssh_host=osx10.10-x64.e.ip.saba.us  ansible_ssh_user=osx
+buildtest_osx10.10-x64                  ansible_ssh_host=buildtest_osx10.10-x64.e.ip.saba.us  ansible_ssh_user=osx
+buildslave_osx10.11-x64                 ansible_ssh_host=osx10.11-x64.e.ip.saba.us  ansible_ssh_user=osx
+buildslave_osx10.12-x64                 ansible_ssh_host=osx10.12-x64.e.ip.saba.us  ansible_ssh_user=osx
+

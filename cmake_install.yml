@@ -11,12 +11,13 @@
     # Download cmake, get source all setup and ready to build
     - stat: path=~/src/cmake-{{cmake_version}}.tar.gz
       register: p
-    # Unfortunately, we can't use https here because the buildbots have an older Python version which doesn't support SNI
-    # See this URL for more information: https://github.com/ansible/ansible-modules-core/issues/1716
     - get_url:
         dest: ~/src
-        url: "http://cmake.org/files/v{{cmake_version | splitext | first}}/cmake-{{cmake_version}}.tar.gz"
+        url: "https://cmake.org/files/v{{cmake_version | splitext | first}}/cmake-{{cmake_version}}.tar.gz"
       when: not p.stat.exists
+
+    - stat: path=~/src/cmake-{{cmake_version}}
+      register: p
     - unarchive: copy=no src=~/src/cmake-{{cmake_version}}.tar.gz dest=~/src creates=~/src/cmake-{{cmake_version}}
       when: not p.stat.exists
 
